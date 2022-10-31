@@ -2,9 +2,7 @@ package com.moysklad.demo.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.moysklad.demo.DemoApplication;
 import com.moysklad.demo.dto.ProductTransferDTO;
-import com.moysklad.demo.dto.ProductVendorQuantity;
 import com.moysklad.demo.entity.Product;
 import com.moysklad.demo.entity.Storehouse;
 import com.moysklad.demo.entity.StorehouseProduct;
@@ -12,24 +10,20 @@ import com.moysklad.demo.entity.StorehouseProductId;
 import com.moysklad.demo.entity.Transfer;
 import com.moysklad.demo.exception.NotEnoughProductsException;
 import com.moysklad.demo.exception.StorehouseIdsAreEqualException;
-import com.moysklad.demo.exception.StorehouseProductException;
 import com.moysklad.demo.repository.ProductRepository;
 import com.moysklad.demo.repository.StorehouseProductRepository;
 import com.moysklad.demo.repository.StorehouseRepository;
 import com.moysklad.demo.service.impl.TransferFromService;
-import com.moysklad.demo.service.impl.TransferFromToServiceImpl;
+import com.moysklad.demo.service.impl.TransferFromToService;
 import com.moysklad.demo.service.impl.TransferToService;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
@@ -47,7 +41,7 @@ public class TransferFromToServiceTests {
   @Autowired
   private StorehouseProductRepository storehouseProductRepository;
   @Autowired
-  private TransferFromToServiceImpl transferFromToService;
+  private TransferFromToService transferFromToService;
   @Autowired
   private TransferFromService transferFromService;
   @Autowired
