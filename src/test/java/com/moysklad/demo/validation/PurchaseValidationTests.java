@@ -69,7 +69,7 @@ public class PurchaseValidationTests {
     purchase.setStorehouseId(1L);
     List<ConstraintViolation<Purchase>> violations = new ArrayList<>(validator.validate(purchase));
     assertEquals(1, violations.size());
-    assertEquals("Quantity should not be negative", violations.get(0).getMessage());
+    assertEquals("Quantity should be more than 1", violations.get(0).getMessage());
   }
 
   @Test
