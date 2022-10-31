@@ -40,7 +40,7 @@ public class ReportControllerTests {
   @Autowired
   private MockMvc mockMvc;
   private final String productsEndpoint = "/reports/products";
-  private final String remediesEndpoint = "/reports/remedies";
+  private final String remediesEndpoint = "/reports/remainders";
   @Autowired
   private ObjectMapper objectMapper;
   @Autowired

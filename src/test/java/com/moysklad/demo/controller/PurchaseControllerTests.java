@@ -52,12 +52,14 @@ public class PurchaseControllerTests {
   private StorehouseProductRepository storehouseProductRepository;
   @Autowired
   private PurchaseRepository purchaseRepository;
+
   @Autowired
   private Utils utils;
 
   private Storehouse storehouse;
   private Product product1;
   private Product product2;
+
 
   @BeforeEach
   void setup() {
@@ -139,6 +141,83 @@ public class PurchaseControllerTests {
     assertEquals(5L, utils.getQuantity(storehouse, product1));
     assertNull(actualProduct1.getLastPurchasePrice());
     assertTrue(purchaseRepository.findAll().isEmpty());
+  }
+  @Test
+  void updatePurchase_ValidPurchase() throws Exception {
+    Set<ProductDocumentDTO> productsSet = Set.of(
+        new ProductDocumentDTO("1", 3L, new BigDecimal(100)),
+        new ProductDocumentDTO("2", 10L, new BigDecimal(1000))
+    );
+    Purchase purchase = new Purchase();
+    purchase.setStorehouseId(storehouse.getId());
+    purchase.setProductSet(productsSet);
+    purchaseRepository.save(purchase);
+    Set<ProductDocumentDTO> productsSetUpdated = Set.of(
+        new ProductDocumentDTO("1", 1L, new BigDecimal(10)),
+        new ProductDocumentDTO("2", 1L, new BigDecimal(10))
+    );
+    Purchase purchaseUpdated = new Purchase();
+    purchaseUpdated.setStorehouseId(storehouse.getId());
+    purchaseUpdated.setProductSet(productsSetUpdated);
+    purchaseUpdated.setId(purchase.getId());
+
+    String putToJson = objectMapper.writeValueAsString(purchaseUpdated);
+
+    mockMvc.perform(put(endpoint)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(putToJson))
+        .andExpect(status().isOk());
+    List<Purchase> actualPurchases = purchaseRepository.findAll();
+    assertEquals(1, actualPurchases.size());
+    assertEquals(purchaseUpdated.getId(), actualPurchases.get(0).getId());
+    assertEquals(purchaseUpdated.getStorehouseId(), actualPurchases.get(0).getStorehouseId());
+    assertEquals(purchaseUpdated.getProductSet(), actualPurchases.get(0).getProductSet());
+  }
+
+  @Test
+  void updatePurchase_InvalidPurchase() throws Exception {
+    Set<ProductDocumentDTO> productsSet = Set.of(
+        new ProductDocumentDTO("1", 3L, new BigDecimal(100)),
+        new ProductDocumentDTO("2", 10L, new BigDecimal(1000))
+    );
+    Purchase purchase = new Purchase();
+    purchase.setStorehouseId(storehouse.getId());
+    purchase.setProductSet(productsSet);
+    purchaseRepository.save(purchase);
+    Set<ProductDocumentDTO> productsSetUpdated = Set.of(
+        new ProductDocumentDTO("1", 1L, new BigDecimal(10)),
+        new ProductDocumentDTO("2", 1L, new BigDecimal(10))
+    );
+    Purchase purchaseUpdated = new Purchase();
+    purchaseUpdated.setStorehouseId(storehouse.getId());
+    purchaseUpdated.setProductSet(productsSetUpdated);
+
+    String putToJson = objectMapper.writeValueAsString(purchaseUpdated);
+
+    mockMvc.perform(put(endpoint)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(putToJson))
+        .andExpect(status().is4xxClientError());
+    List<Purchase> actualPurchases = purchaseRepository.findAll();
+    assertEquals(1, actualPurchases.size());
+    assertEquals(purchase.getId(), actualPurchases.get(0).getId());
+    assertEquals(purchase.getStorehouseId(), actualPurchases.get(0).getStorehouseId());
+    assertEquals(purchase.getProductSet(), actualPurchases.get(0).getProductSet());
+  }
+  @Test
+  void shouldDeleteById() throws Exception{
+    Set<ProductDocumentDTO> productsSet = Set.of(
+        new ProductDocumentDTO("1", 3L, new BigDecimal(100)),
+        new ProductDocumentDTO("2", 10L, new BigDecimal(1000))
+    );
+    Purchase purchase = new Purchase();
+    purchase.setStorehouseId(storehouse.getId());
+    purchase.setProductSet(productsSet);
+    purchaseRepository.saveAndFlush(purchase);
+    mockMvc.perform(delete(endpoint)
+            .param("purchaseId", purchase.getId().toString()))
+        .andExpect(status().isOk());
+    assertEquals(0, purchaseRepository.findAll().size());
   }
 
 

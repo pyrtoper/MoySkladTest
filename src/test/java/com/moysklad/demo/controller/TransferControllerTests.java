@@ -10,6 +10,7 @@ import com.moysklad.demo.dto.ProductDocumentDTO;
 import com.moysklad.demo.dto.ProductTransferDTO;
 import com.moysklad.demo.entity.Product;
 import com.moysklad.demo.entity.Purchase;
+import com.moysklad.demo.entity.Sale;
 import com.moysklad.demo.entity.Storehouse;
 import com.moysklad.demo.entity.StorehouseProduct;
 import com.moysklad.demo.entity.StorehouseProductId;
@@ -149,6 +150,92 @@ public class TransferControllerTests {
     Product actualProduct1 = productRepository.findByVendorCode(product1.getVendorCode()).orElseThrow();
     assertEquals(7L, utils.getQuantity(storehouse1, actualProduct1));
     assertEquals(1, transferRepository.findAll().size());
+  }
+
+  @Test
+  void updateTransfer_ValidTransfer() throws Exception {
+    Set<ProductTransferDTO> productsSet = Set.of(
+        new ProductTransferDTO("1", 3L),
+        new ProductTransferDTO("2", 10L)
+    );
+    Transfer transfer = new Transfer();
+    transfer.setStorehouseFromId(storehouse2.getId());
+    transfer.setStorehouseToId(storehouse1.getId());
+    transfer.setProductSet(productsSet);
+    transferRepository.save(transfer);
+    Set<ProductTransferDTO> productsSetUpdated = Set.of(
+        new ProductTransferDTO("1", 1L),
+        new ProductTransferDTO("2", 1L)
+    );
+    Transfer transferUpdated = new Transfer();
+    transferUpdated.setStorehouseFromId(storehouse2.getId());
+    transferUpdated.setStorehouseToId(storehouse1.getId());
+    transferUpdated.setProductSet(productsSetUpdated);
+    transferUpdated.setId(transfer.getId());
+
+    String putToJson = objectMapper.writeValueAsString(transferUpdated);
+
+    mockMvc.perform(put(endpoint)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(putToJson))
+        .andExpect(status().isOk());
+    List<Transfer> actualTransfers = transferRepository.findAll();
+    assertEquals(1, actualTransfers.size());
+    assertEquals(transferUpdated.getId(), actualTransfers.get(0).getId());
+    assertEquals(transferUpdated.getStorehouseFromId(), actualTransfers.get(0).getStorehouseFromId());
+    assertEquals(transferUpdated.getStorehouseToId(), actualTransfers.get(0).getStorehouseToId());
+    assertEquals(transferUpdated.getProductSet(), actualTransfers.get(0).getProductSet());
+  }
+
+  @Test
+  void updateTransfer_NoId_InvalidTransfer() throws Exception {
+    Set<ProductTransferDTO> productsSet = Set.of(
+        new ProductTransferDTO("1", 3L),
+        new ProductTransferDTO("2", 10L)
+    );
+    Transfer transfer = new Transfer();
+    transfer.setStorehouseFromId(storehouse2.getId());
+    transfer.setStorehouseToId(storehouse1.getId());
+    transfer.setProductSet(productsSet);
+    transferRepository.save(transfer);
+    Set<ProductTransferDTO> productsSetUpdated = Set.of(
+        new ProductTransferDTO("1", 1L),
+        new ProductTransferDTO("2", 1L)
+    );
+    Transfer transferUpdated = new Transfer();
+    transferUpdated.setStorehouseFromId(storehouse2.getId());
+    transferUpdated.setStorehouseToId(storehouse1.getId());
+    transferUpdated.setProductSet(productsSetUpdated);
+
+    String putToJson = objectMapper.writeValueAsString(transferUpdated);
+
+    mockMvc.perform(put(endpoint)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(putToJson))
+        .andExpect(status().is4xxClientError());
+    List<Transfer> actualTransfers = transferRepository.findAll();
+    assertEquals(1, actualTransfers.size());
+    assertEquals(transfer.getId(), actualTransfers.get(0).getId());
+    assertEquals(transfer.getStorehouseFromId(), actualTransfers.get(0).getStorehouseFromId());
+    assertEquals(transfer.getStorehouseToId(), actualTransfers.get(0).getStorehouseToId());
+    assertEquals(transfer.getProductSet(), actualTransfers.get(0).getProductSet());
+  }
+
+  @Test
+  void shouldDeleteById() throws Exception{
+    Set<ProductTransferDTO> productsSet = Set.of(
+        new ProductTransferDTO("1", 3L),
+        new ProductTransferDTO("2", 10L)
+    );
+    Transfer transfer = new Transfer();
+    transfer.setStorehouseFromId(storehouse2.getId());
+    transfer.setStorehouseToId(storehouse1.getId());
+    transfer.setProductSet(productsSet);
+    transferRepository.saveAndFlush(transfer);
+    mockMvc.perform(delete(endpoint)
+            .param("transferId", transfer.getId().toString()))
+        .andExpect(status().isOk());
+    assertEquals(0, transferRepository.findAll().size());
   }
 
   @AfterEach

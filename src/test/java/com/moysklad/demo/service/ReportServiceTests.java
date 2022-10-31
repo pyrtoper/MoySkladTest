@@ -3,7 +3,6 @@ package com.moysklad.demo.service;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.moysklad.demo.dto.ProductDocumentDTO;
 import com.moysklad.demo.dto.ProductGeneralInfoDTO;
 import com.moysklad.demo.entity.Product;
 import com.moysklad.demo.entity.Storehouse;
@@ -13,19 +12,15 @@ import com.moysklad.demo.repository.StorehouseProductRepository;
 import com.moysklad.demo.repository.StorehouseRepository;
 import com.moysklad.demo.service.impl.ReportServiceImpl;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -79,7 +74,7 @@ public class ReportServiceTests {
   void shouldReturnAllRemediesReport() {
     Mockito.when(storehouseProductRepository.findAll()).thenReturn(initialInfoInDB);
     Map<Long, List<ProductGeneralInfoDTO>> actualReport =
-        reportService.getAllRemedies();
+        reportService.getAllRemainders();
     assertEquals(Map.of(storehouse1.getId(), firstStorehouseProducts,
         storehouse2.getId(), secondStorehouseProducts),
         actualReport);
@@ -91,7 +86,7 @@ public class ReportServiceTests {
       List<ProductGeneralInfoDTO> remedies) {
     Mockito.when(storehouseRepository.findById(Mockito.any())).thenReturn(Optional.of(storehouse1));
     Map<Long, List<ProductGeneralInfoDTO>> actualReport =
-        reportService.getStorehouseRemediesInfo(storehouse.getId());
+        reportService.getStorehouseRemaindersInfo(storehouse.getId());
     assertEquals(Map.of(storehouse1.getId(), firstStorehouseProducts), actualReport);
   }
 

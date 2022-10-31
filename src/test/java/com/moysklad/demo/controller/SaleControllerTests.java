@@ -3,8 +3,10 @@ package com.moysklad.demo.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -150,6 +152,85 @@ public class SaleControllerTests {
         .contains(actualProduct1.getLastSalePrice()));
     assertEquals(new BigDecimal(20), actualProduct2.getLastSalePrice());
     assertEquals(1, saleRepository.findAll().size());
+  }
+
+  @Test
+  void updateSale_ValidSale() throws Exception {
+    Set<ProductDocumentDTO> productsSet = Set.of(
+        new ProductDocumentDTO("1", 3L, new BigDecimal(100)),
+        new ProductDocumentDTO("2", 10L, new BigDecimal(1000))
+    );
+    Sale sale = new Sale();
+    sale.setStorehouseId(storehouse.getId());
+    sale.setProductSet(productsSet);
+    saleRepository.save(sale);
+    Set<ProductDocumentDTO> productsSetUpdated = Set.of(
+        new ProductDocumentDTO("1", 1L, new BigDecimal(10)),
+        new ProductDocumentDTO("2", 1L, new BigDecimal(10))
+    );
+    Sale saleUpdated = new Sale();
+    saleUpdated.setStorehouseId(storehouse.getId());
+    saleUpdated.setProductSet(productsSetUpdated);
+    saleUpdated.setId(sale.getId());
+
+    String putToJson = objectMapper.writeValueAsString(saleUpdated);
+
+    mockMvc.perform(put(endpoint)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(putToJson))
+        .andExpect(status().isOk());
+    List<Sale> actualSales = saleRepository.findAll();
+    assertEquals(1, actualSales.size());
+    assertEquals(saleUpdated.getId(), actualSales.get(0).getId());
+    assertEquals(saleUpdated.getStorehouseId(), actualSales.get(0).getStorehouseId());
+    assertEquals(saleUpdated.getProductSet(), actualSales.get(0).getProductSet());
+  }
+
+  @Test
+  void shouldDeleteById() throws Exception{
+    Set<ProductDocumentDTO> productsSet = Set.of(
+        new ProductDocumentDTO("1", 3L, new BigDecimal(100)),
+        new ProductDocumentDTO("2", 10L, new BigDecimal(1000))
+    );
+    Sale sale = new Sale();
+    sale.setStorehouseId(storehouse.getId());
+    sale.setProductSet(productsSet);
+    saleRepository.saveAndFlush(sale);
+    mockMvc.perform(delete(endpoint)
+            .param("saleId", sale.getId().toString()))
+        .andExpect(status().isOk());
+    assertEquals(0, saleRepository.findAll().size());
+  }
+
+  @Test
+  void updateSale_InvalidSale() throws Exception {
+    Set<ProductDocumentDTO> productsSet = Set.of(
+        new ProductDocumentDTO("1", 3L, new BigDecimal(100)),
+        new ProductDocumentDTO("2", 10L, new BigDecimal(1000))
+    );
+    Sale sale = new Sale();
+    sale.setStorehouseId(storehouse.getId());
+    sale.setProductSet(productsSet);
+    saleRepository.save(sale);
+    Set<ProductDocumentDTO> productsSetUpdated = Set.of(
+        new ProductDocumentDTO("1", 1L, new BigDecimal(10)),
+        new ProductDocumentDTO("2", 1L, new BigDecimal(10))
+    );
+    Sale saleUpdated = new Sale();
+    saleUpdated.setStorehouseId(storehouse.getId());
+    saleUpdated.setProductSet(productsSetUpdated);
+
+    String putToJson = objectMapper.writeValueAsString(saleUpdated);
+
+    mockMvc.perform(put(endpoint)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(putToJson))
+        .andExpect(status().is4xxClientError());
+    List<Sale> actualSales = saleRepository.findAll();
+    assertEquals(1, actualSales.size());
+    assertEquals(sale.getId(), actualSales.get(0).getId());
+    assertEquals(sale.getStorehouseId(), actualSales.get(0).getStorehouseId());
+    assertEquals(sale.getProductSet(), actualSales.get(0).getProductSet());
   }
 
   @AfterEach
