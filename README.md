@@ -1,5 +1,7 @@
 # Тестовой задание МойСклад
 
+Использованные технологии: Spring Boot, PostgreSQL, Spring Data, JUnit 5, Mockito, Testcontainers, Spring Validation, Swagger, Apache Maven. 
+
 Для запуска тестов нужен предустановленный Docker (для работы Testcontainers)
 База данных PostgreSQL лежит в облаке Railway.app, необходимые параметры для доступа к ней лежат в файле application.properties, если нужно будет подключиться к ней извне. Скрипт с DDL командами лежит в src/test/resources/db/final_schema.sql (для тестов)
 
