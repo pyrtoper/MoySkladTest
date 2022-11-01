@@ -84,7 +84,7 @@ public class StorehouseController {
   @PostMapping(
       produces = "application/json", consumes = "application/json")
   public Storehouse createStorehouse(@RequestBody @Valid Storehouse storehouse) {
-    if (storehouse.getId() == null || storehouseRepository.findById(storehouse.getId()).isPresent()) {
+    if (storehouse.getId() == null || storehouseRepository.findById(storehouse.getId()).isEmpty()) {
       storehouseRepository.save(storehouse);
     } else {
       throw new EntityExistsException("Storehouse with that id already exists");
