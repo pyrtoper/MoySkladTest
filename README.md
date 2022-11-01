@@ -1,4 +1,4 @@
-# Тестовой задание МойСклад
+# Тестовое задание МойСклад
 
 Использованные технологии: Spring Boot, PostgreSQL, Spring Data, JUnit 5, Mockito, Testcontainers, Spring Validation, Swagger, Apache Maven. 
 
